@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">frogogoTest</string>
+    <string name="surName">Фамилия</string>
+    <string name="Name">Имя</string>
+    <string name="email">Email</string>
+    <string name="save">Сохранить</string>
+    <string name="dialog_create">Создать</string>
+    <string name="dialog_edit">Редактировать</string>
 </resources>
