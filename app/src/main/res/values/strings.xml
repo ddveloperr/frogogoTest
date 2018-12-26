@@ -12,8 +12,8 @@
     <string name="item_created">Создан: %1$s</string>
     <string name="item_updated">Обновлен: %1$s</string>
     <string name="load_error">Не удалось загрузить пользователей</string>
-    <string name="create_success">Пользователь создан</string>
+    <string name="create_success">Пользователь %1$s %2$s - создан</string>
     <string name="create_failed">Ошибка при создании пользователя</string>
-    <string name="patch_success">Пользователь обновлен</string>
+    <string name="patch_success">Пользователь %1$s %2$s - обновлен</string>
     <string name="patch_failed">Ошибка при обновлении пользователя</string>
 </resources>

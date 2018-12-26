@@ -65,7 +65,7 @@ public class Presenter implements IPresenter {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        mView.showSnackBar("Ошибка");
+                        mView.showSnackBar(resources.getString(R.string.load_error));
                         mView.hideProgressBar();
                         mView.showErrorButton();
                     }
@@ -101,10 +101,9 @@ public class Presenter implements IPresenter {
                     @Override
                     public void accept(Response<User> userResponse) throws Exception {
                         if(userResponse.code()==201){
-                            mView.showSnackBar(resources.getString(R.string.create_success));
+                            mView.showSnackBar(resources.getString(R.string.create_success,userResponse.body().getLastName(),userResponse.body().getFirstName()));
                             getUserList(false);
                         }else{
-                            Log.d("ErrorDebig",userResponse.message());
                             mView.showSnackBar(resources.getString(R.string.create_failed));
                         }
                     }
@@ -137,7 +136,7 @@ public class Presenter implements IPresenter {
                     @Override
                     public void accept(Response<User> userResponse) throws Exception {
                         if(userResponse.code()==200){
-                            mView.showSnackBar(resources.getString(R.string.patch_success));
+                            mView.showSnackBar(resources.getString(R.string.patch_success,userResponse.body().getLastName(),userResponse.body().getFirstName()));
                             getUserList(false);
                         }else{
                             mView.showSnackBar(resources.getString(R.string.patch_failed));

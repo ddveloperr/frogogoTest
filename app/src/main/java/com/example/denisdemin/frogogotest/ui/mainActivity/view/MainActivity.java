@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements IView, SwipeRefre
 
         recyclerView.setAdapter(usersAdapter);
 
+        swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
         swipeRefreshLayout.setOnRefreshListener(this);
 
         mPresenter.getUserList(false);
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements IView, SwipeRefre
     @Override
     public void setListData(List<User> userList) {
         usersAdapter.swapAdapter(userList);
+        recyclerView.scheduleLayoutAnimation();
     }
 
     @Override

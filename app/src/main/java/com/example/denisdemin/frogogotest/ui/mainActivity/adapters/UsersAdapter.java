@@ -3,6 +3,7 @@ package com.example.denisdemin.frogogotest.ui.mainActivity.adapters;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder viewHolder, int position) {
+        Log.d("POSISS",String.valueOf(position));
         viewHolder.bind(userList.get(position));
     }
 
