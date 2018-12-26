@@ -3,7 +3,11 @@ package com.example.denisdemin.frogogotest.data.Api.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.joda.time.DateTime;
+
 public class User {
+
+    private final String dateFormat = "dd/MM/yy HH:mm";
 
     @SerializedName("id")
     @Expose
@@ -71,20 +75,15 @@ public class User {
     }
 
     public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+        DateTime dt = new DateTime(createdAt);
+        return dt.toString(dateFormat);
     }
 
     public String getUpdatedAt() {
-        return updatedAt;
+        DateTime dt = new DateTime(updatedAt);
+        return dt.toString(dateFormat);
     }
 
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
     public String getUrl() {
         return url;

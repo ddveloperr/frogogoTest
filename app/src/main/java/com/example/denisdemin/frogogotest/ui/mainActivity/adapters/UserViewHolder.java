@@ -5,6 +5,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.denisdemin.frogogotest.R;
@@ -14,6 +15,7 @@ import com.squareup.picasso.Picasso;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.subjects.PublishSubject;
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class UserViewHolder extends RecyclerView.ViewHolder {
 
@@ -25,6 +27,15 @@ public class UserViewHolder extends RecyclerView.ViewHolder {
 
     @BindView(R.id.image_view_profile_pic)
     AppCompatImageView imageViewProfilePic;
+
+    @BindView(R.id.text_view_created)
+    TextView textViewCreated;
+
+    @BindView(R.id.text_view_updated)
+    TextView textViewUpdated;
+
+    @BindView(R.id.relative_layout_extra)
+    RelativeLayout relativeLayoutExtra;
 
     private PublishSubject<User> clickSubject;
 
@@ -38,22 +49,34 @@ public class UserViewHolder extends RecyclerView.ViewHolder {
     }
 
     void bind(final User user) {
-        textViewUserName.setText(user.getFirstName());
+        textViewUserName.setText(rootView.getResources().getString(R.string.item_fullName,user.getLastName(),user.getFirstName()));
         textViewEmail.setText(user.getEmail());
+        textViewCreated.setText(rootView.getResources().getString(R.string.item_created,user.getCreatedAt()));
+        textViewUpdated.setText(rootView.getResources().getString(R.string.item_updated,user.getUpdatedAt()));
         if (user.getAvatarUrl()==null || user.getAvatarUrl().equals("")) {
-            Picasso.with(itemView.getContext())
-                    .load(R.drawable.ic_default_profile_pic)
-                    .into(imageViewProfilePic);
+            imageViewProfilePic.setImageResource(R.drawable.ic_default_profile_pic);
         }else{
             Picasso.with(itemView.getContext())
                     .load(user.getAvatarUrl())
                     .error(R.drawable.ic_default_profile_pic)
+                    .transform(new CropCircleTransformation())
                     .into(imageViewProfilePic);
         }
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 clickSubject.onNext(user);
+            }
+        });
+        rootView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if(relativeLayoutExtra.getVisibility()==View.VISIBLE){
+                    relativeLayoutExtra.setVisibility(View.GONE);
+                }else{
+                    relativeLayoutExtra.setVisibility(View.VISIBLE);
+                }
+                return false;
             }
         });
     }

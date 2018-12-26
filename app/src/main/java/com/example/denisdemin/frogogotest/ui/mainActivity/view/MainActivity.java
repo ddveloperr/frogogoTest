@@ -1,17 +1,22 @@
 package com.example.denisdemin.frogogotest.ui.mainActivity.view;
 
+import android.content.DialogInterface;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.denisdemin.frogogotest.R;
+import com.example.denisdemin.frogogotest.common.UserDialog;
 import com.example.denisdemin.frogogotest.data.Api.model.User;
 import com.example.denisdemin.frogogotest.ui.mainActivity.adapters.UsersAdapter;
 import com.example.denisdemin.frogogotest.ui.mainActivity.presenter.Presenter;
@@ -22,16 +27,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Observable;
+import io.reactivex.internal.queue.MpscLinkedQueue;
+import io.reactivex.subjects.PublishSubject;
 
-public class MainActivity extends AppCompatActivity implements IView{
+public class MainActivity extends AppCompatActivity implements IView, SwipeRefreshLayout.OnRefreshListener {
 
     private Presenter mPresenter;
 
-    private UsersAdapter usersAdapter;
+    private UsersAdapter usersAdapter = new UsersAdapter();
 
-    private AlertDialog.Builder dialogBuilder;
-
-    private AlertDialog dialog;
+    private UserDialog dialog;
 
     @BindView(R.id.progress_bar)
     ProgressBar progressBar;
@@ -39,9 +44,20 @@ public class MainActivity extends AppCompatActivity implements IView{
     @BindView(R.id.recycler_view_main)
     RecyclerView recyclerView;
 
+    @BindView(R.id.button_reload)
+    Button buttonReload;
+
+    @BindView(R.id.swipe_refresh_layout)
+    SwipeRefreshLayout swipeRefreshLayout;
+
+    @OnClick(R.id.button_reload)
+    void onReloadClicked(){
+        mPresenter.getUserList(false);
+    }
+
     @OnClick(R.id.fab)
     void onFabClicked(){
-
+        mPresenter.onFabClicked();
     }
 
     @BindView(R.id.fab)
@@ -53,15 +69,13 @@ public class MainActivity extends AppCompatActivity implements IView{
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mPresenter = new Presenter(this);
-
-        usersAdapter = new UsersAdapter();
-
-        dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        mPresenter = new Presenter(this,getResources());
 
         recyclerView.setAdapter(usersAdapter);
 
-        mPresenter.getUserList();
+        swipeRefreshLayout.setOnRefreshListener(this);
+
+        mPresenter.getUserList(false);
     }
 
     @Override
@@ -75,19 +89,16 @@ public class MainActivity extends AppCompatActivity implements IView{
     }
 
     @Override
+    public Observable<User> dialogSave() {
+        return dialog.respondToClick();
+    }
+
+    @Override
     public void showDialog(@Nullable User user, boolean createNew) {
-        dialogBuilder.setView(R.layout.item_dialog);
-        dialog = dialogBuilder.create();//todo editText, TextInputLayout, check that out
-        View dialogView = getLayoutInflater().inflate(R.layout.item_dialog,null);
-        dialog.show();
-        if (createNew) {
-            ((TextView)dialogView.findViewById(R.id.text_view_dialog_header)).setText(getResources().getString(R.string.dialog_create));
-        }else{
-            ((TextView)dialogView.findViewById(R.id.text_view_dialog_header)).setText(getResources().getString(R.string.dialog_edit));
-            ((TextView)dialogView.findViewById(R.id.edit_text_surName)).setText(user.getLastName());
-            ((TextView)dialogView.findViewById(R.id.edit_text_name)).setText(user.getFirstName());
-            ((TextView)dialogView.findViewById(R.id.edit_text_email)).setText(user.getEmail());
-        }
+        dialog = new UserDialog(getLayoutInflater(),this);
+
+        dialog.getDialog(user, createNew).show();
+        mPresenter.respondToDialogSave();
     }
 
     @Override
@@ -98,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements IView{
     @Override
     public void hideProgressBar() {
         progressBar.setVisibility(View.INVISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
 
@@ -117,12 +129,17 @@ public class MainActivity extends AppCompatActivity implements IView{
     }
 
     @Override
-    public void showError() {
-
+    public void showErrorButton() {
+        buttonReload.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void hideError() {
+    public void hideErrorButton() {
+        buttonReload.setVisibility(View.INVISIBLE);
+    }
 
+    @Override
+    public void onRefresh() {
+        mPresenter.getUserList(true);
     }
 }

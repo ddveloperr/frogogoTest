@@ -28,8 +28,11 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_person_black_24dp" />
+                            <entry key="height" value="20" />
+                            <entry key="outputName" value="ic_person_black_20dp" />
+                            <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="C:\Users\141de" />
+                            <entry key="width" value="20" />
                           </map>
                         </option>
                       </PersistentState>

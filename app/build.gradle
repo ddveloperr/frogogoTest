@@ -56,4 +56,7 @@ dependencies {
     //picasso
     implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'jp.wasabeef:picasso-transformations:2.2.1'
+
+    //joda time
+    implementation 'net.danlew:android.joda:2.9.7'
 }
