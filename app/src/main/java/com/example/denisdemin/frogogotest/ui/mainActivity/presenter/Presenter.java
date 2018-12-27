@@ -26,13 +26,13 @@ public class Presenter implements IPresenter {
 
     private IView mView;
 
+    private Resources resources;
+
     private Retrofit retrofit;
 
     private ApiService apiService;
 
     private CompositeDisposable compositeDisposable;
-
-    private Resources resources;
 
     public Presenter(IView mView, Resources resources) {
         this.mView = mView;

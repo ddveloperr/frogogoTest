@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements IView, SwipeRefre
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout swipeRefreshLayout;
 
+    @BindView(R.id.fab)
+    FloatingActionButton floatingActionButton;
+
     @OnClick(R.id.button_reload)
     void onReloadClicked(){
         mPresenter.getUserList(false);
@@ -59,9 +62,6 @@ public class MainActivity extends AppCompatActivity implements IView, SwipeRefre
     void onFabClicked(){
         mPresenter.onFabClicked();
     }
-
-    @BindView(R.id.fab)
-    FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -28,11 +28,9 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="height" value="20" />
-                            <entry key="outputName" value="ic_person_black_20dp" />
-                            <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="C:\Users\141de" />
-                            <entry key="width" value="20" />
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="ic_default_profile_pic_2" />
+                            <entry key="sourceFile" value="C:\Users\141de\Desktop\round-account-button-with-user-inside.svg" />
                           </map>
                         </option>
                       </PersistentState>
