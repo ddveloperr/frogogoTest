@@ -1,5 +1,6 @@
 package com.example.denisdemin.frogogotest.ui.mainActivity.adapters;
 
+import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
@@ -21,6 +22,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.PublishSubject;
 
 public class UsersAdapter extends RecyclerView.Adapter<UserViewHolder> {
@@ -29,15 +31,20 @@ public class UsersAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     private PublishSubject<User> itemClicks = PublishSubject.create();
 
+    private PublishSubject<Integer> longItemClicks = PublishSubject.create();
+
+    public UsersAdapter() {
+        subscribeLongClick();
+    }
+
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        return new UserViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_user,viewGroup,false),itemClicks);
+        return new UserViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_user,viewGroup,false),itemClicks,longItemClicks);
     }
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder viewHolder, int position) {
-        Log.d("POSISS",String.valueOf(position));
         viewHolder.bind(userList.get(position));
     }
 
@@ -54,6 +61,14 @@ public class UsersAdapter extends RecyclerView.Adapter<UserViewHolder> {
         this.userList.clear();
         this.userList.addAll(userList);
         notifyDataSetChanged();
+    }
+
+    @SuppressLint("CheckResult")
+    private void subscribeLongClick(){
+        longItemClicks.subscribe(position -> {
+            userList.get(position).setExtraVisible(!userList.get(position).isExtraVisible());
+            notifyItemChanged(position);
+        });
     }
 
     public Observable<User> observeClicks(){return itemClicks;}

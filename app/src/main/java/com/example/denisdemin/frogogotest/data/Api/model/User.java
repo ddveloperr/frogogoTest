@@ -1,5 +1,7 @@
 package com.example.denisdemin.frogogotest.data.Api.model;
 
+import android.view.View;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -33,6 +35,24 @@ public class User {
     @SerializedName("url")
     @Expose
     private String url;
+
+    private boolean isExtraVisible = false;
+
+    public boolean isExtraVisible() {
+        return isExtraVisible;
+    }
+
+    public void setExtraVisible(boolean extraVisible) {
+        isExtraVisible = extraVisible;
+    }
+
+    public int extraViewVisibility(){
+        if(isExtraVisible){
+            return View.VISIBLE;
+        }else{
+            return View.GONE;
+        }
+    }
 
     public Integer getId() {
         return id;

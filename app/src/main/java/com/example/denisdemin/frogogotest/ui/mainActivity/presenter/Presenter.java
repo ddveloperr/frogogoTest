@@ -11,14 +11,14 @@ import com.example.denisdemin.frogogotest.ui.mainActivity.view.IView;
 
 import java.util.List;
 
-import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
@@ -43,149 +43,97 @@ public class Presenter implements IPresenter {
     }
 
     @Override
-    public void getUserList(final boolean isSwipeRefresh) {
+    public void getUserList(boolean isSwipeRefresh) {
         compositeDisposable.add(apiService.getUserList().subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        if (!isSwipeRefresh) {
-                            mView.showProgressBar();
-                        }
-                        mView.hideErrorButton();
-                        mView.hideFab();
+                .doOnSubscribe(disposable -> {
+                    if (!isSwipeRefresh) {
+                        mView.showProgressBar();
                     }
-                }).subscribe(new Consumer<Response<List<User>>>() {
-                    @Override
-                    public void accept(Response<List<User>> listResponse) throws Exception {
-                        mView.setListData(listResponse.body());
-                        mView.showFab();
-                        respondToItemClick();
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        mView.showSnackBar(resources.getString(R.string.load_error));
-                        mView.hideProgressBar();
-                        mView.showErrorButton();
-                    }
-                }, new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        mView.hideProgressBar();
-                    }
-                }));
+                    mView.hideErrorButton();
+                    mView.hideFab();
+                }).subscribe(listResponse -> {
+                    mView.setListData(listResponse.body());
+                    mView.showFab();
+                    respondToItemClick();
+                }, throwable -> {
+                    mView.showSnackBar(resources.getString(R.string.load_error));
+                    mView.hideProgressBar();
+                    mView.showErrorButton();
+                }, () -> mView.hideProgressBar()));
     }
 
     @Override
     public void dispatchUser(User user) {
-        if(user.getId()!=null){
-            patchUser(user);
-        }else{
-            postUser(user);
+        if (user.getId() != null) {
+            updateUser(user);
+        } else {
+            createUser(user);
         }
     }
 
     @Override
-    public void postUser(User user) {
-        compositeDisposable.add(apiService.createNewUser(user).subscribeOn(Schedulers.io())
+    public void createUser(User user) {
+        compositeDisposable.add(apiService.createNewUser(user)
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(disposable -> {
+                    mView.showProgressBar();
+                    mView.hideErrorButton();
+                    mView.hideFab();
+                })
+                .flatMap((Function<Response<User>, ObservableSource<Response<List<User>>>>) userResponse -> apiService.getUserList())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        mView.showProgressBar();
-                        mView.hideErrorButton();
-                        mView.hideFab();
-                    }
-                }).subscribe(new Consumer<Response<User>>() {
-                    @Override
-                    public void accept(Response<User> userResponse) throws Exception {
-                        if(userResponse.code()==201){
-                            mView.showSnackBar(resources.getString(R.string.create_success,userResponse.body().getLastName(),userResponse.body().getFirstName()));
-                            getUserList(false);
-                        }else{
-                            mView.showSnackBar(resources.getString(R.string.create_failed));
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        mView.showSnackBar(resources.getString(R.string.create_failed));
-                    }
-                }, new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        mView.hideProgressBar();
-                        mView.showFab();
-                    }
+                .subscribe(listResponse -> {
+                    mView.showSnackBar(resources.getString(R.string.create_success));
+                    mView.setListData(listResponse.body());
+                    mView.showFab();
+                    respondToItemClick();
+                }, throwable -> mView.showSnackBar(resources.getString(R.string.create_failed)), () -> {
+                    mView.hideProgressBar();
+                    mView.showFab();
                 }));
     }
 
     @Override
-    public void patchUser(User user) {
-        compositeDisposable.add(apiService.editUser(user.getId(),user).subscribeOn(Schedulers.io())
+    public void updateUser(User user) {
+        compositeDisposable.add(apiService.editUser(user.getId(),user)
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(disposable -> {
+                    mView.showProgressBar();
+                    mView.hideErrorButton();
+                    mView.hideFab();
+                })
+                .flatMap((Function<Response<User>, ObservableSource<Response<List<User>>>>) userResponse -> apiService.getUserList())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        mView.showProgressBar();
-                        mView.hideErrorButton();
-                        mView.hideFab();
-                    }
-                }).subscribe(new Consumer<Response<User>>() {
-                    @Override
-                    public void accept(Response<User> userResponse) throws Exception {
-                        if(userResponse.code()==200){
-                            mView.showSnackBar(resources.getString(R.string.patch_success,userResponse.body().getLastName(),userResponse.body().getFirstName()));
-                            getUserList(false);
-                        }else{
-                            mView.showSnackBar(resources.getString(R.string.patch_failed));
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        mView.showSnackBar(resources.getString(R.string.patch_failed));
-                    }
-                }, new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        mView.hideProgressBar();
-                        mView.showFab();
-                    }
+                .subscribe(listResponse -> {
+                    mView.showSnackBar(resources.getString(R.string.update_success));
+                    mView.setListData(listResponse.body());
+                    mView.showFab();
+                    respondToItemClick();
+                }, throwable -> mView.showSnackBar(resources.getString(R.string.update_failed)), () -> {
+                    mView.hideProgressBar();
+                    mView.showFab();
                 }));
     }
 
     @Override
     public void onFabClicked() {
-        mView.showDialog(null,true);
+        mView.showDialog(null, true);
     }
 
     @Override
     public void respondToItemClick() {
-        compositeDisposable.add(mView.itemClicks().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<User>() {
-                    @Override
-                    public void accept(User user) throws Exception {
-                        mView.showDialog(user,false);
-                    }
-                }));
+        compositeDisposable.add(mView.itemClicks().subscribe(user -> mView.showDialog(user, false)));
     }
 
     @Override
     public void respondToDialogSave() {
-        compositeDisposable.add(mView.dialogSave().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<User>() {
-                    @Override
-                    public void accept(User user) throws Exception {
-                        dispatchUser(user);
-                    }
-                }));
+        compositeDisposable.add(mView.dialogSave().subscribe(this::dispatchUser));
     }
 
     @Override
     public void cancelNetworkCall() {
-        if(!compositeDisposable.isDisposed()){
+        if (!compositeDisposable.isDisposed()) {
             compositeDisposable.dispose();
         }
     }

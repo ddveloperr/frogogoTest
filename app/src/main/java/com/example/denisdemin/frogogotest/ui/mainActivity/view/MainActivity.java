@@ -144,4 +144,10 @@ public class MainActivity extends AppCompatActivity implements IView, SwipeRefre
     public void onRefresh() {
         mPresenter.getUserList(true);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.cancelNetworkCall();
+    }
 }
